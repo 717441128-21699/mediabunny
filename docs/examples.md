@@ -50,4 +50,10 @@ features:
       target: _self
       icon:
         src: /mingcute--live-line.svg
+    - title: FLV to MP4
+      details: "Inspect the tracks of a Flash Video (.flv) file and convert it to MP4 entirely in the browser."
+      link: /examples/flv-to-mp4/
+      target: _self
+      icon:
+        src: /mingcute--video-line.svg
 ---

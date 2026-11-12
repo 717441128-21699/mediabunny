@@ -20,6 +20,7 @@ import {
 	VideoCodec,
 } from './codec';
 import { FlacMuxer } from './flac/flac-muxer';
+import { FlvMuxer } from './flv/flv-muxer';
 import { IsobmffMuxer } from './isobmff/isobmff-muxer';
 import { MatroskaMuxer } from './matroska/matroska-muxer';
 import { MediaSource } from './media-source';
@@ -1539,5 +1540,59 @@ export class HlsOutputFormat extends OutputFormat {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	override _codecUnsupportedHint(codec: MediaCodec): string {
 		return ` Using different segment formats may grant support for this codec.`;
+	}
+}
+
+/**
+ * Flash Video (FLV) file format. Supports H.264 (AVC), HEVC and AV1 video as well as AAC and MP3 audio. HEVC and AV1
+ * are written using the Enhanced FLV ExVideoTag extension.
+ * @group Output formats
+ * @public
+ */
+export class FlvOutputFormat extends OutputFormat {
+	/** @internal */
+	_createMuxer(output: Output) {
+		return new FlvMuxer(output, this);
+	}
+
+	/** @internal */
+	get _name() {
+		return 'FLV';
+	}
+
+	getSupportedTrackCounts(): TrackCountLimits {
+		return {
+			video: { min: 0, max: 1 },
+			audio: { min: 0, max: 1 },
+			subtitle: { min: 0, max: 0 },
+			total: { min: 1, max: 2 },
+		};
+	}
+
+	get fileExtension() {
+		return '.flv';
+	}
+
+	get mimeType() {
+		return 'video/x-flv';
+	}
+
+	getSupportedCodecs(): MediaCodec[] {
+		return [
+			...VIDEO_CODECS.filter(codec => ['avc', 'hevc', 'av1'].includes(codec)),
+			...AUDIO_CODECS.filter(codec => ['aac', 'mp3'].includes(codec)),
+		];
+	}
+
+	get supportsVideoTransformationMetadata() {
+		return false;
+	}
+
+	get supportsTimestampedMediaData() {
+		return true;
+	}
+
+	get negativeTimestampSupport() {
+		return 'prefer-non-negative' as const;
 	}
 }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en-US" translate="no">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>FLV conversion example | Mediabunny</title>
+		<meta name="description" content="Drop an FLV file to inspect its tracks, then convert it to MP4 entirely in the browser.">
+		<script type="module" src="../base.ts"></script>
+		<script type="module" src="./flv-conversion.ts"></script>
+		<link rel="stylesheet" href="../base.css">
+		<link rel="icon" href="../../docs/public/mediabunny-logo.svg">
+		<link rel="canonical" href="https://mediabunny.dev/examples/flv-conversion/">
+		<meta property="og:site_name" content="Mediabunny">
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="FLV conversion example | Mediabunny">
+		<meta property="og:description" content="Drop an FLV file to inspect its tracks, then convert it to MP4 entirely in the browser.">
+		<meta property="og:url" content="https://mediabunny.dev/examples/flv-conversion/">
+		<meta property="og:image" content="https://mediabunny.dev/mediabunny-og-image.png">
+		<meta property="og:locale" content="en-US">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@vanilagy">
+		<meta name="twitter:title" content="FLV conversion example | Mediabunny">
+		<meta name="twitter:description" content="Drop an FLV file to inspect its tracks, then convert it to MP4 entirely in the browser.">
+		<meta name="twitter:image" content="https://mediabunny.dev/mediabunny-og-image.png">
+	</head>
+
+	<body class="flex flex-col items-center py-10 bg-zinc-50 text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 px-2">
+		<h1 class="text-3xl font-bold text-blue-500 text-center">FLV conversion example</h1>
+		<p class="max-w-lg text-center">Drop an FLV file to inspect its tracks and timestamps, then convert it to an MP4 you can download.</p>
+
+		<div class="flex flex-col items-center gap-1">
+			<div class="flex gap-2 mt-4">
+				<button id="select-file" class="rounded-lg bg-zinc-200 dark:bg-zinc-750 hover:bg-zinc-300 dark:hover:bg-zinc-700 px-5 py-2">
+					Select FLV file
+				</button>
+			</div>
+		</div>
+
+		<p class="text-xs opacity-60 mt-2 mx-auto text-center max-w-[36rem]" id="file-name"></p>
+
+		<hr class="w-full max-w-96 my-4 border-zinc-300 dark:border-zinc-700" style="display: none;">
+
+		<p id="status" class="text-center text-sm font-medium mb-4"></p>
+		<div id="track-container" class="text-sm w-full max-w-2xl"></div>
+
+		<div class="flex gap-2 mt-6" id="convert-controls" style="display: none;">
+			<button id="convert-to-mp4" class="rounded-lg bg-blue-500 hover:bg-blue-600 text-white px-5 py-2">
+				Convert to MP4
+			</button>
+		</div>
+
+		<a id="download-link" class="mt-4 text-blue-500 hover:underline" style="display: none;" download="converted.mp4">
+			Download converted MP4
+		</a>
+
+		<a href="/" class="fixed top-0 left-0 flex gap-2 py-2 px-5 items-center">
+			<img src="../../docs/public/mediabunny-logo.svg" class="size-6">
+			<p class="text-sm font-medium">Mediabunny</p>
+		</a>
+
+		<a
+			href="https://github.com/Vanilagy/mediabunny/tree/main/examples/flv-conversion"
+			target="_blank"
+			class="flex items-center gap-2 fixed top-0 right-0 py-2 px-5 bg-zinc-200 dark:bg-zinc-750 hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded-bl-xl"
+		>
+			<img src="../../docs/assets/github-mark.svg" class="size-6 dark:invert">
+			<p>View source code</p>
+		</a>
+	</body>
+
+	<style>
+		@reference "../base.css";
+
+		ul {
+			@apply py-1 px-4 bg-gray-500/10 rounded-lg max-w-2xl;
+		}
+
+		b {
+			@apply font-semibold;
+		}
+	</style>
+</html>

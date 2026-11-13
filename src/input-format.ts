@@ -33,6 +33,7 @@ import { readAscii, readBytes, readU32Be, readU64Be } from './reader';
 import { FlacDemuxer } from './flac/flac-demuxer';
 import { MpegTsDemuxer } from './mpeg-ts/mpeg-ts-demuxer';
 import { TS_PACKET_SIZE } from './mpeg-ts/mpeg-ts-misc';
+import { FlvDemuxer } from './flv/flv-demuxer';
 import { HlsDemuxer } from './hls/hls-demuxer';
 import { HLS_MIME_TYPE } from './hls/hls-misc';
 import { PathedSource } from './source';
@@ -679,6 +680,42 @@ export class MpegTsInputFormat extends InputFormat {
 }
 
 /**
+ * Flash Video (FLV) file format, including Enhanced FLV with FourCC-based HEVC and AV1 video.
+ *
+ * Do not instantiate this class; use the {@link FLV} singleton instead.
+ *
+ * @group Input formats
+ * @public
+ */
+export class FlvInputFormat extends InputFormat {
+	/** @internal */
+	async _canReadInput(input: Input) {
+		let slice = input._reader.requestSlice(0, 3);
+		if (isThenable(slice)) slice = await slice;
+		if (!slice) return false;
+
+		return readAscii(slice, 3) === 'FLV';
+	}
+
+	/** @internal */
+	_createDemuxer(input: Input) {
+		return new FlvDemuxer(input);
+	}
+
+	get name() {
+		return 'Flash Video';
+	}
+
+	get mimeType() {
+		return 'video/x-flv';
+	}
+
+	get supportsTimestampedMediaData() {
+		return true;
+	}
+}
+
+/**
  * Media described using the HTTP Live Streaming (HLS) protocol, with playlists in the M3U8 format.
  *
  * Do not instantiate this class; use the {@link HLS} singleton instead.
@@ -789,6 +826,13 @@ export const FLAC = /* #__PURE__ */ new FlacInputFormat();
 export const MPEG_TS = /* #__PURE__ */ new MpegTsInputFormat();
 
 /**
+ * FLV input format singleton.
+ * @group Input formats
+ * @public
+ */
+export const FLV = /* #__PURE__ */ new FlvInputFormat();
+
+/**
  * HLS input format singleton.
  * @group Input formats
  * @public
@@ -801,7 +845,7 @@ export const HLS = /* #__PURE__ */ new HlsInputFormat();
  * @group Input formats
  * @public
  */
-export const ALL_FORMATS: InputFormat[] = [HLS, MP4, QTFF, MATROSKA, WEBM, WAVE, OGG, FLAC, MP3, ADTS, MPEG_TS];
+export const ALL_FORMATS: InputFormat[] = [HLS, MP4, QTFF, MATROSKA, WEBM, WAVE, OGG, FLAC, MP3, ADTS, MPEG_TS, FLV];
 
 /**
  * List of input formats required for playback of typical HLS manifests. Includes HLS itself as well as the typical

@@ -28,6 +28,8 @@ import { Muxer } from './muxer';
 import { OggMuxer } from './ogg/ogg-muxer';
 import { Output, OutputTrack, TrackType } from './output';
 import { MpegTsMuxer } from './mpeg-ts/mpeg-ts-muxer';
+import { FlvMuxer } from './flv/flv-muxer';
+import { FLV_MIME_TYPE } from './flv/flv-misc';
 import { WaveMuxer } from './wave/wave-muxer';
 import { HlsMuxer } from './hls/hls-muxer';
 import { HLS_MIME_TYPE } from './hls/hls-misc';
@@ -1225,6 +1227,111 @@ export class MpegTsOutputFormat extends OutputFormat {
 		return [
 			...VIDEO_CODECS.filter(codec => ['avc', 'hevc'].includes(codec)),
 			...AUDIO_CODECS.filter(codec => ['aac', 'mp3', 'ac3', 'eac3', 'dts'].includes(codec)),
+		];
+	}
+
+	get supportsVideoTransformationMetadata() {
+		return false;
+	}
+
+	get supportsTimestampedMediaData() {
+		return true;
+	}
+
+	get negativeTimestampSupport() {
+		return 'prefer-non-negative' as const;
+	}
+}
+
+/**
+ * FLV-specific output options.
+ * @group Output formats
+ * @public
+ */
+export type FlvOutputFormatOptions = {
+	/**
+	 * An offset in seconds that is added to all timestamps written to the file. It keeps timestamps that would otherwise
+	 * be negative (caused by audio priming samples or B-frames) positive in the final file, since negative timestamps
+	 * trip up some players.
+	 *
+	 * Defaults to 0.
+	 */
+	timestampOffset?: number;
+
+	/**
+	 * Will be called for each FLV tag (including script and sequence-header tags) that is written.
+	 *
+	 * @param data - The raw tag bytes, including the tag header and its trailing PreviousTagSize field.
+	 * @param position - The byte offset of the tag header in the file.
+	 */
+	onTag?: (data: Uint8Array, position: number) => unknown;
+};
+
+/**
+ * Flash Video (FLV) file format.
+ *
+ * Supports a single video track (H.264/AVC, and Enhanced FLV HEVC or AV1) and a single audio track (AAC or MP3). The
+ * muxer accepts both Annex B and length-prefixed video input, and both ADTS and raw AAC input, normalizing them to the
+ * framing FLV requires.
+ *
+ * @group Output formats
+ * @public
+ */
+export class FlvOutputFormat extends OutputFormat {
+	/** @internal */
+	_options: FlvOutputFormatOptions;
+
+	/** Creates a new {@link FlvOutputFormat} configured with the specified `options`. */
+	constructor(options: FlvOutputFormatOptions = {}) {
+		if (!options || typeof options !== 'object') {
+			throw new TypeError('options must be an object.');
+		}
+		if (
+			options.timestampOffset !== undefined
+			&& (!Number.isFinite(options.timestampOffset) || options.timestampOffset < 0)
+		) {
+			throw new TypeError('options.timestampOffset, when provided, must be a non-negative number.');
+		}
+		if (options.onTag !== undefined && typeof options.onTag !== 'function') {
+			throw new TypeError('options.onTag, when provided, must be a function.');
+		}
+
+		super();
+
+		this._options = options;
+	}
+
+	/** @internal */
+	_createMuxer(output: Output) {
+		return new FlvMuxer(output, this);
+	}
+
+	/** @internal */
+	get _name() {
+		return 'FLV';
+	}
+
+	getSupportedTrackCounts(): TrackCountLimits {
+		return {
+			video: { min: 0, max: 1 },
+			audio: { min: 0, max: 1 },
+			subtitle: { min: 0, max: 0 },
+			total: { min: 0, max: 2 },
+		};
+	}
+
+	get fileExtension() {
+		return '.flv';
+	}
+
+	get mimeType() {
+		return FLV_MIME_TYPE;
+	}
+
+	getSupportedCodecs(): MediaCodec[] {
+		return [
+			...VIDEO_CODECS.filter(codec => ['avc', 'hevc', 'av1'].includes(codec)),
+			...AUDIO_CODECS.filter(codec => ['aac', 'mp3'].includes(codec)),
 		];
 	}
 
